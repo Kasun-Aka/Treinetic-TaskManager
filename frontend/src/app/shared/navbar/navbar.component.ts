@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, CommonModule],
   template: `
-    <mat-toolbar color=#161b27>
+    <mat-toolbar color="primary">
       <mat-icon>task_alt</mat-icon>
       <span style="margin-left:8px; font-weight:500">Task Manager</span>
       <span style="flex:1"></span>

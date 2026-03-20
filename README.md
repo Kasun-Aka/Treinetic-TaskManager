@@ -20,10 +20,34 @@ A full-stack task management application built with **Angular 17**, **Spring Boo
 
 ```
 taskmanager/
-├── backend/              # Spring Boot app
-│   ├── src/
+├── backend/
+│   ├── src/main/java/com/treinetic/taskmanager/
+│   │   ├── config/
+│   │   │   ├── AppConfig.java          # UserDetailsService & PasswordEncoder beans
+│   │   │   ├── JwtUtil.java            # JWT generation & validation
+│   │   │   ├── JwtFilter.java          # JWT request filter
+│   │   │   └── SecurityConfig.java     # Security filter chain & CORS
+│   │   ├── controller/
+│   │   │   ├── AuthController.java     # Register & Login endpoints
+│   │   │   └── TaskController.java     # Task CRUD endpoints
+│   │   ├── dto/
+│   │   │   ├── AuthDTO.java            # Login, Register, AuthResponse
+│   │   │   └── TaskDTO.java            # Task request body
+│   │   ├── entity/
+│   │   │   ├── Task.java
+│   │   │   ├── TaskStatus.java         # Enum: TO_DO, IN_PROGRESS, DONE
+│   │   │   └── User.java
+│   │   ├── repository/
+│   │   │   ├── TaskRepository.java
+│   │   │   └── UserRepository.java
+│   │   ├── service/
+│   │   │   ├── AuthService.java
+│   │   │   └── TaskService.java
+│   │   └── TaskManagerApplication.java
+│   ├── src/main/resources/
+│   │   └── application.properties
 │   └── Dockerfile
-├── frontend/             # Angular app
+├── frontend/
 │   ├── src/
 │   ├── Dockerfile
 │   └── nginx.conf
@@ -41,11 +65,11 @@ taskmanager/
 docker-compose up --build
 ```
 
-| Service  | URL                    |
-|----------|------------------------|
-| Frontend | http://localhost:4200  |
-| Backend  | http://localhost:8080  |
-| MySQL    | localhost:3306         |
+| Service  | URL                   |
+|----------|-----------------------|
+| Frontend | http://localhost:4200 |
+| Backend  | http://localhost:8080 |
+| MySQL    | localhost:3306        |
 
 To stop:
 ```bash
@@ -60,11 +84,7 @@ docker-compose down
 
 1. Install MySQL 8 and start the service.
 2. The app auto-creates the database on first run (`createDatabaseIfNotExist=true`).
-3. Default credentials in `application.properties`:
-   - Host: `localhost:3306`
-   - Database: `taskmanager`
-   - Username: `root`
-   - Password: `root`
+3. Default credentials in `application.properties`.
 
 > Update `backend/src/main/resources/application.properties` if your credentials differ.
 
@@ -93,20 +113,20 @@ Runs on: `http://localhost:4200`
 
 ### Auth (Public)
 
-| Method | Endpoint              | Description         |
-|--------|-----------------------|---------------------|
-| POST   | /api/auth/register    | Register a new user |
-| POST   | /api/auth/login       | Login, returns JWT  |
+| Method | Endpoint           | Description        |
+|--------|--------------------|--------------------|
+| POST   | /api/auth/register | Register a new user |
+| POST   | /api/auth/login    | Login, returns JWT |
 
 ### Tasks (Requires Bearer Token)
 
-| Method | Endpoint          | Description               |
-|--------|-------------------|---------------------------|
-| GET    | /api/tasks        | Get all tasks (filter by `?status=TO_DO`) |
-| GET    | /api/tasks/{id}   | Get task by ID            |
-| POST   | /api/tasks        | Create new task           |
-| PUT    | /api/tasks/{id}   | Update task               |
-| DELETE | /api/tasks/{id}   | Delete task               |
+| Method | Endpoint        | Description                              |
+|--------|-----------------|------------------------------------------|
+| GET    | /api/tasks      | Get all tasks (filter by `?status=TO_DO`) |
+| GET    | /api/tasks/{id} | Get task by ID                           |
+| POST   | /api/tasks      | Create new task                          |
+| PUT    | /api/tasks/{id} | Update task                              |
+| DELETE | /api/tasks/{id} | Delete task                              |
 
 ---
 
@@ -133,6 +153,26 @@ Register via the UI or POST to `/api/auth/register`:
 | TO_DO       | Not started |
 | IN_PROGRESS | In progress |
 | DONE        | Completed   |
+
+---
+
+## Error Responses
+
+All errors return a JSON object with a single `error` field:
+
+```json
+{ "error": "Invalid credentials" }
+```
+
+| Scenario                  | HTTP Status | Message                          |
+|---------------------------|-------------|----------------------------------|
+| Missing username/password | 400         | "Username is required" / "Password is required" |
+| Wrong login credentials   | 401         | "Invalid credentials"            |
+| Username already taken    | 409         | "Username is already taken"      |
+| Task not found            | 404         | "Task not found with id: {id}"   |
+| Title missing             | 400         | "Title is required"              |
+| Title too long            | 400         | "Title must be under 100 characters" |
+| Description too long      | 400         | "Description must be under 500 characters" |
 
 ---
 
